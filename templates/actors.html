@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2> Actors </h2>
+<h4> You may delete actors from the DB </h4>
+
+
+{% if not all_actors %}
+There are no actors to show.
+
+{% else %}
+
+<ul>
+{% for t in all_actors %}
+	<li>
+        <a> {{ t }}</a>
+        <form action="/delete/{{ t }}" method="POST">
+          {{ form.hidden_tag() }}
+          {{ form.submit() }}
+          <br>
+      	</form>
+    </li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+
+<div>
+{% for message in get_flashed_messages() %}
+<strong>*** {{ message }} ***</strong>
+{% endfor %}
+</div>
+
+{% endblock %}

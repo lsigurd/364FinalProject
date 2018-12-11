@@ -1,0 +1,9 @@
+
+
+<form method="POST" action="/update/{{ movie }}">
+{{ form.hidden_tag() }}
+{{form.new_rating.label }} {{ form.new_rating() }}
+{{ form.submit() }}
+</form>
+
+

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1> This is your Movie Database </h1>
+</div>
+
+<h3> Movies / Ratings / Directors / Genres</h3>
+
+<ul>
+{% for s in all_movies %}
+	<li>{{ s[0] }}--- Rating: {{ s[1] }},  Director: {{ s[2] }}, Genre: {{ s[3] }}
+	<form method="POST" action="/update/{{ s[0] }}">
+        	{{ form.hidden_tag() }}
+        	{{ form.submit() }}
+	</form>
+	</li>
+{% endfor %}
+</ul>
+
+<div>
+{% for message in get_flashed_messages() %}
+<b>{{ message }} </b>
+{% endfor %}
+</div>
+
+<br>
+</br>
+
+<h3> Actors / Movies </h3>
+
+<ul>
+{% for t in all_actors %}
+<li>{{ t[0] }}--- {{ t[1] }} </li><br>
+{% endfor %}
+</ul>
+
+
+{% if not all_movies %}
+    There are no movies to show.
+{% endif %}
+
+
+{% if not all_actors %}
+    There are no actors to show.
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2> Number of Directors per Genre </h2>
+
+<ul>
+{% for t in all_genres %}
+<li> {{ t[0] }}--- {{ t[1] }} director{% if t[1] > 1 %}s{% endif %} </li><br>
+{% endfor %}
+</ul>
+
+
+{% if not all_genres %}
+There are no saved genres to show.
+{% endif %}
+
+{% endblock %}
