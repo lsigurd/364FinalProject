@@ -1,4 +1,6 @@
+{% extends 'base.html' %}
 
+{% block content %}
 
 <form method="POST" action="/update/{{ movie }}">
 {{ form.hidden_tag() }}
@@ -6,4 +8,11 @@
 {{ form.submit() }}
 </form>
 
+<div>
+{% for message in get_flashed_messages() %}
+<strong>*** {{ message }} ***</strong>
+{% endfor %}
+</div>
 
+
+{% endblock %}

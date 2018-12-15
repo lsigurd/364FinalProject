@@ -130,7 +130,7 @@ def load_user(user_id):
 def validate_movie_name(self, field):
     user_input = field.data
     if len(user_input) < 3:
-        raise ValidationError("Your movie name must be at least 3 characters.")
+        raise ValidationError("Your movie name must be at least 3 characters")
 
 def validate_genre(self, field):
     user_input = field.data
@@ -138,6 +138,15 @@ def validate_genre(self, field):
     if user_input not in ["Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Film Noir", "Game-Show", "History", "Horror", "Music", "Musical", "Mystery", "News", "Reality-TV", "Romance", "Sci-Fi", "Short", "Sport", "Talk Show", "Thriller", "War", "Western"]:
         raise ValidationError("That is not an option for a genre")
 
+# def validate_search_rating(self, field):
+#     user_input = field.data
+#     if user_input not in [1, 2, 3, 4, 5]:
+#         raise ValidationError("The searched rating must be from 1-5")
+
+def validate_update_rating(self, field):
+    user_input = field.data
+    if user_input not in ['1', '2', '3', '4', '5']:
+        raise ValidationError("Your updated rating must be from 1-5")
 
 ###################
 ###### FORMS ######
@@ -188,7 +197,7 @@ class UpdateButtonForm(FlaskForm):
     submit = SubmitField("Update Rating for This Movie")
 
 class UpdateRatingForm(FlaskForm):
-    new_rating = StringField("Enter the new rating of this movie: ", validators=[Required()])
+    new_rating = StringField("Enter the new rating of this movie: ", validators=[Required(), validate_update_rating])
     submit = SubmitField("Update Rating of Movie")
 
 
@@ -319,12 +328,14 @@ def secret():
 def index():
     # Initialize the form
     form = MovieForm()
+    search_form = RatingForm(request.args)
 
     if form.validate_on_submit():
         movie_name = form.movie_name.data
         movie_genre = form.movie_genre.data
         movie_rating = form.movie_rating.data
         
+        print("hiiiiiiii")
         print(movie_name)
         print(movie_genre)
         print(movie_rating)
@@ -335,11 +346,10 @@ def index():
         api_request = requests.get(baseurl, params = params)
         movie_dict = json.loads(api_request.text)
 
-        print(movie_dict)
-
         if "Error" in movie_dict:
+            print("Nope not there")
             flash("Please check your spelling or enter another movie. That movie was not found in the API")
-            return render_template('index.html', form = form)
+            return render_template('index.html', form = form, search_form = search_form)
         else:
             movie_director = str(movie_dict['Director'])
             actor_string = str(movie_dict['Actors'])
@@ -351,8 +361,8 @@ def index():
             movie_query = Movie.query.filter_by(name = movie_name).first() 
 
             if movie_query:
-                flash("someone already entered this movie in the database")
-                return render_template('index.html', form = form)
+                flash("Someone already entered this movie in the database")
+                return render_template('index.html', form = form, search_form = search_form)
             else:
                 query_director = get_or_create_director(movie_director)
                 query_genre = get_or_create_genre(movie_genre, movie_director)
@@ -363,18 +373,16 @@ def index():
                 flash("movie successfully added to the db")
                 return redirect(url_for('form_result'))     
 
-
-    search_form = RatingForm(request.args)
     search_results = None
-    print(search_form.validate())
     if search_form.validate():
-        print(search_form.rating_search.data)
         rating_search = int(search_form.rating_search.data)
+        if rating_search not in [1,2,3,4,5]:
+            flash("Rating must be from 1-5")
+            return render_template('index.html', form = form, search_form = search_form)
         search_results = Movie.query.filter_by(rating = rating_search).all()
-        print(search_results)
         if not search_results:
             flash("No results found for this rating")
-            return render_template('index.html', search_form = search_form)
+            return render_template('index.html', form = form, search_form = search_form)
         else:
             print(search_results)
 
@@ -451,6 +459,12 @@ def update(movie):
         db.session.commit()
         flash("***Updated Rating of {}***".format(movie.name))
         return redirect(url_for('form_result'))
+    
+    # # If the form did NOT validate / was not submitted
+    if (form.new_rating.data != ''):
+        errors = [v for v in form.errors.values()]
+        if len(errors) > 0:
+            flash("errors in submission - " + str(errors))
     return render_template('update_movie.html', movie=movie, form=form)
 
 
